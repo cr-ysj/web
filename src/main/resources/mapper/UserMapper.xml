@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.UserMapper">
+
+    <resultMap id="User" type="com.example.demo.pojo.User">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="cust_name" property="nikName"></result>
+        <result column="phone" property="phone"></result>
+        <collection property="roleList" ofType="com.example.demo.pojo.Role" javaType="ArrayList">
+            <id property="id" column="roleId"></id>
+            <result property="roleName" column="roleName"></result>
+            <collection property="authList" ofType="com.example.demo.pojo.Auth" javaType="ArrayList">
+                <id property="roleId" column="authId"></id>
+                <id property="id" column="authId"></id>
+                <result property="auth" column="auth"></result>
+                <result property="description" column="description"></result>
+                <result property="roleId" column="roleId"></result>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getUserByUsername" resultMap="User" parameterType="com.example.demo.pojo.User">
+         select a.id,b.id as roleId ,d.id as authId,username ,password,email,cust_name ,phone ,d.auth,d.description
+         from
+         sys_user a ,sys_role b,sys_user_role c,sys_auth d, sys_role_auth e
+         where a.id =c.user_id and b.id=c.role_id and b.id=e.role_id  and d.id=e.auth_id
+         and username=#{username}
+          </select>
+</mapper>
