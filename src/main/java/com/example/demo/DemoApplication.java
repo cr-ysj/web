@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 public class DemoApplication {
 
 	public static void main(String[] args) {
-		System.setProperty("WORKDIR","D:\\develop\\oauth");
+		System.setProperty("WORKDIR","D:\\develop\\demo");
 		SpringApplication.run(DemoApplication.class, args);
 	}
 }
