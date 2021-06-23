@@ -8,11 +8,17 @@ import com.example.demo.pojo.Role;
 import com.example.demo.pojo.User;
 import com.example.demo.pojo.constant.GlobalConstant;
 import com.example.demo.utils.JsonUtils;
+import com.example.demo.utils.RedisUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.redisson.Redisson;
+import org.redisson.RedissonRedLock;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +33,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -60,33 +67,49 @@ public class JWTFilter   extends OncePerRequestFilter {
     // 有效时间
     public long tokenValidityInMilliseconds=GlobalConstant.tokenValidityInMilliseconds;
 
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+       /* Config config = new Config();
+        config.useSingleServer()
+                .setAddress("redis://127.0.0.1:6379");
+        RedissonClient redissonClient = Redisson.create(config);
+        String resourceName="REDLOCK_KEY";
+        RLock lock= redissonClient.getLock(resourceName);
+        RedissonRedLock redLock = new RedissonRedLock(lock);
+        boolean isLock;
+        try { // isLock = redLock.tryLock(); // 500ms拿不到锁, 就认为获取锁失败。10000ms即10s是锁失效时间。
+            isLock = redLock.tryLock(500, 10000, TimeUnit.MILLISECONDS);
+            log.info("lock is "+isLock);
+            if (isLock) {
+                log.info("JWTFilter  doFilterInternal  :time:"+ DateFormatUtils.format(new Date(),"yyyy-MM-dd hh:mm:ss"));
+                //从url中根据参数获取值
+                String jwt = obtainParameter(request, GlobalConstant.jwt);
+                Authentication authentication=null;
+                if (StringUtils.hasText(jwt)) {
+                    getAuthentication( jwt ,response);
+
+                }
+                filterChain.doFilter(request, response);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        } finally {
+            redLock.unlock();
+        }*/
         log.info("JWTFilter  doFilterInternal  :time:"+ DateFormatUtils.format(new Date(),"yyyy-MM-dd hh:mm:ss"));
         //从url中根据参数获取值
         String jwt = obtainParameter(request, GlobalConstant.jwt);
-        Authentication authentication=null;
         if (StringUtils.hasText(jwt)) {
-            try {
-                //考虑缓存
-                authentication= getAuthentication( jwt ,WebApplicationContextUtils.getWebApplicationContext(request.getServletContext()).getBean(UserMapper.class));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-            catch (io.jsonwebtoken.ExpiredJwtException e){
-                //jwt过期
-                log.error("认证过期");
-                response.setContentType("application/json;charset=utf-8");
-                ObjectMapper mapper=new ObjectMapper();
-                // 添加一个map对象，方便等下转换成字符串
-                Map json = new HashMap<String ,Object>();
-                json.put("code",GlobalConstant.accountExpired);
-                PrintWriter out = response.getWriter();
-                out.write(mapper.writeValueAsString(json));
-                out.println();
-                out.flush();
-                out.close();
-            }
+            getAuthentication( jwt ,response);
+
         }
+      /*  Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        if(!StringUtils.hasText(jwt)&&authentication!=null){
+            SecurityContextHolder.getContext().setAuthentication(null);
+        }
+        request.getSession().removeAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);*/
         filterChain.doFilter(request, response);
     }
 
@@ -100,22 +123,54 @@ public class JWTFilter   extends OncePerRequestFilter {
            return "";
        }
     }
+    @Autowired
+    private RedisUtils redisUtils;
+
     //获取权限(私有方法获取不到userMapper)
-    public Authentication getAuthentication(String token,UserMapper userMapper) {
-        // 根据token获取用户信息
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        User user = JSONUtil.toBean(claims.getSubject(), User.class);
-        // 2. 设置权限
-        Collection<GrantedAuthority> grantedAuthorities =   user.getAuthorities();
-        return new UsernamePasswordAuthenticationToken(user, token, grantedAuthorities);
+    public void getAuthentication(String jwt,HttpServletResponse response) throws IOException {
+        //todo 从redis获取jwt
+        String token=String.valueOf(redisUtils.getHash(jwt,GlobalConstant.jwt));
+        if(org.apache.commons.lang.StringUtils.isBlank(token)||"null".equals(token)){
+            log.error("登录过期");
+            response.setContentType("application/json;charset=utf-8");
+            ObjectMapper mapper=new ObjectMapper();
+            // 添加一个map对象，方便等下转换成字符串
+            Map json = new HashMap<String ,Object>();
+            json.put("code",GlobalConstant.accountExpired);
+            PrintWriter out = response.getWriter();
+            out.write(mapper.writeValueAsString(json));
+            out.println();
+            out.flush();
+            out.close();
+        }else {
+            Claims claims=null;
+            try {
+                claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            }
+            catch (io.jsonwebtoken.ExpiredJwtException e){
+                //todo 需要做压测显示出线程安全问题
+                log.error("认证过期:刷新令牌");
+                //刷新令牌
+                String newToken=createJWT(token, GlobalConstant.tokenValidityInMilliseconds);
+                redisUtils.setHash(jwt,GlobalConstant.jwt,createJWT(newToken, GlobalConstant.tokenValidityInMilliseconds),GlobalConstant.TokenExpireTime);
+            }
+            //从redis获取授权信息
+            Object hash = redisUtils.getHash(jwt, GlobalConstant.auths);
+            User user = JSONUtil.toBean(String.valueOf(hash), User.class);
+            // 2. 设置权限
+            Collection<GrantedAuthority> grantedAuthorities =   user.getAuthorities();
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, token, grantedAuthorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
     }
+
 
     /**
      * 创建令牌
      * @param  authentication登录信息
      * @param ttlMillis  过期时间
      * */
-    public  String createJWT(Authentication authentication, long ttlMillis) {
+    public  String createJWT(String userName, long ttlMillis) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256; //指定签名的时候使用的签名算法，也就是header那部分，jjwt已经将这部分内容封装好了。
         long nowMillis = System.currentTimeMillis();//生成JWT的时间
         Date now = new Date(nowMillis);
@@ -124,7 +179,7 @@ public class JWTFilter   extends OncePerRequestFilter {
         JwtBuilder builder = Jwts.builder() //这里其实就是new一个JwtBuilder，设置jwt的body
                 .setClaims(claims)          //如果有私有声明，一定要先设置这个自己创建的私有的声明，这个是给builder的claim赋值，一旦写在标准的声明赋值之后，就是覆盖了那些标准的声明的
                 .setIssuedAt(now)           //iat: jwt的签发时间
-                .setSubject(JsonUtils.deserializer(authentication.getPrincipal()))        //sub(Subject)：代表这个JWT的主体，即它的所有人，这个是一个json格式的字符串，可以存放什么userid，roldid之类的，作为什么用户的唯一标志。
+                .setSubject(JsonUtils.deserializer(userName))        //sub(Subject)：代表这个JWT的主体，即它的所有人，这个是一个json格式的字符串，可以存放什么userid，roldid之类的，作为什么用户的唯一标志。
                 .signWith(signatureAlgorithm, key);//设置签名使用的签名算法和签名使用的秘钥
         if (ttlMillis >= 0) {
             long expMillis = nowMillis + ttlMillis;

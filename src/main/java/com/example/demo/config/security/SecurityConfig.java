@@ -128,7 +128,7 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
         String[] ignoringUrls = GlobalConstant.ignoringUrls;
         ArrayList<String> matchUrl =new ArrayList();
         matchUrl.addAll( Arrays.asList(ignoringUrls));
-        http
+        http.anonymous().and()
                 //权限不足处理
                 .exceptionHandling().accessDeniedHandler(authAccessDeniedHandler).and()
                 .csrf().disable()//关闭csrf
@@ -145,7 +145,6 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .loginPage(GlobalConstant.loginUrl)//登录页面
-                .and().sessionManagement().invalidSessionUrl(GlobalConstant.loginUrl)//session失效的跳转页面
                 //登录验证(过滤器按照一定顺序加入过滤器链。)
                 .and().addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         authenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler);
