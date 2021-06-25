@@ -128,6 +128,15 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
         String[] ignoringUrls = GlobalConstant.ignoringUrls;
         ArrayList<String> matchUrl =new ArrayList();
         matchUrl.addAll( Arrays.asList(ignoringUrls));
+
+        /**
+         * ：Spring Security对url的权限判断有两种方式，一种是请求是permitAll的则直接返回校验通过，
+         * 另外一个是判断Authentication是不是AnonymousAuthenticationToken，因为正常登录等产生的不是这个对象，如果不是这个类型的对象则表示登录成功了
+         * isAnonymous中就是判断传递过来的Authentication对象是不是AnonymousAuthenticationToken，
+         * 如果是AnonymousAuthenticationToken则表示没有登录，
+         * 因为登录之后生成的对象是UsernamePasswordAuthenticationToken或其他Authentication对象，
+         * */
+        //SessionManagementFilter  this.trustResolver.isAnonymous(authentication)
         http.anonymous().and()
                 //权限不足处理
                 .exceptionHandling().accessDeniedHandler(authAccessDeniedHandler).and()

@@ -45,6 +45,8 @@ public class MybatisConfiguration {
         configuration.setLogImpl(org.apache.ibatis.logging.log4j.Log4jImpl.class);
         configuration.setAggressiveLazyLoading(false);
         configuration.setLazyLoadingEnabled(true);
+        //设置枚举转换器
+        configuration.setDefaultEnumTypeHandler(EnumTypeHandler.class);
         Set<String> lazyLoadTriggerMethods =new HashSet<String>();
         lazyLoadTriggerMethods.add("toString");
         configuration.setLazyLoadTriggerMethods(lazyLoadTriggerMethods);

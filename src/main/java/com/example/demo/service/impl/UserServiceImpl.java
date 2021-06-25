@@ -1,9 +1,10 @@
-package com.example.demo.service;
+package com.example.demo.service.impl;
 
 import com.example.demo.dao.UserMapper;
 import com.example.demo.pojo.Auth;
 import com.example.demo.pojo.Role;
 import com.example.demo.pojo.User;
+import com.example.demo.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

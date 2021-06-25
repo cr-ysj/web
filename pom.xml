@@ -78,12 +78,19 @@
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<!--工具类-->
 		<dependency>
 			<groupId>cn.hutool</groupId>
 			<artifactId>hutool-all</artifactId>
 			<version>4.5.15</version>
 		</dependency>
+		<!--定时任务-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+		<!--redission锁-->
 		<dependency>
 			<groupId>org.redisson</groupId>
 			<artifactId>redisson</artifactId>
@@ -95,6 +102,7 @@
 			<artifactId>mapper</artifactId>
 			<version>3.4.2</version>
 		</dependency>
+		<!--数据源连接池-->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>

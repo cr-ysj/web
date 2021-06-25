@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.ScheduleJobMapper">
+
+
+
+    <resultMap id="ScheduleJob" type="com.example.demo.pojo.quartz.ScheduleJob">
+        <id column="id" property="id"></id>
+        <result column="job_name" property="jobName"></result>
+        <result column="description" property="description"></result>
+        <result column="cron_expression" property="cronExpression"></result>
+        <result column="bean_class" property="beanClass"></result>
+<!--
+        注意需要配置javaType 去寻找类型
+-->
+        <result column="job_status" javaType="com.example.demo.pojo.enums.JobStatus" property="jobStatus" typeHandler="com.example.demo.config.datasource.EnumTypeHandler"/>
+        <result column="job_group" property="jobGroup"></result>
+
+    </resultMap>
+
+    <select id="findInitScheduleJobs" resultMap="ScheduleJob">
+           SELECT id,job_name ,description ,cron_expression,bean_class ,job_status,job_group FROM  sys_task
+    </select>
+
+</mapper>
