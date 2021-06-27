@@ -1,14 +1,17 @@
 package com.example.demo.jobdetail;
 
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+
+import java.util.Date;
 
 @DisallowConcurrentExecution //作业不并发
-public class HelloWold implements Job {
+public class HelloWold extends ZkQuartzJobBean {
+
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        System.out.println("HelloWold");
+    void run(JobExecutionContext jobexecutioncontext) {
+        System.out.println("hello");
     }
 }
+

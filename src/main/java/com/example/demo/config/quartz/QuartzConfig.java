@@ -1,6 +1,5 @@
 package com.example.demo.config.quartz;
 
-import com.example.demo.config.pool.SimpleExecutorConfig;
 import org.quartz.Scheduler;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
@@ -19,6 +18,9 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+/**
+ *quartz的分布式只是解决了高可用的问题，并没有解决任务分片的问题，还是会有单机处理的极限
+ * */
 @SuppressWarnings("all")
 @Configuration
 public class QuartzConfig {
@@ -73,8 +75,6 @@ public class QuartzConfig {
         try {
             //是否覆盖已经存在的任务
             factory.setOverwriteExistingJobs(true);
-            //配置数据源,这是quartz使用的表的数据库存放位置
-            factory.setDataSource(dataSource);
             //设置定时任务的属性
             factory.setQuartzProperties(quartzProperties());
             //配置线程池
