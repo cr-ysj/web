@@ -27,7 +27,7 @@ public class QuartzManager {
                     JobDetail jobDetail = JobBuilder.newJob(jobClass).withIdentity(task.getJobName(), task.getJobGroup()).build();// 任务名称和组构成任务key
                     // 定义调度触发规则 使用cornTrigger规则
                     Trigger trigger = TriggerBuilder.newTrigger().withIdentity(task.getJobName(), task.getJobGroup())// 触发器key
-                            .startAt(DateBuilder.futureDate(1, DateBuilder.IntervalUnit.SECOND)) //立即启动
+                            .startAt(DateBuilder.futureDate(0, DateBuilder.IntervalUnit.MILLISECOND)) //立即启动
                             .withSchedule(CronScheduleBuilder.cronSchedule(task.getCronExpression())).startNow().build();
                     // 把作业和触发器注册到任务调度中
                     scheduler.scheduleJob(jobDetail, trigger);

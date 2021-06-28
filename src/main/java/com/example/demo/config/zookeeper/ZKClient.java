@@ -7,6 +7,7 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -65,17 +66,31 @@ public class ZKClient {
         ConnectionStateListener listener= new ConnectionStateListener(){
             @Override
             public void stateChanged(CuratorFramework zkClient, ConnectionState state) {
-                //初始化创建节点
-                if(state.equals(ConnectionState.CONNECTED)){
-                  log.info("客户端链接开启");
+                try {
+                    //初始化创建节点
+                    if(state.equals(ConnectionState.CONNECTED)){
+                        log.info("客户端连接开启");
+
+                    }
+                    if(state.equals(ConnectionState.RECONNECTED)){
+                        log.info("客户端重新连接");
+
+                    }
+                    if(state.equals(ConnectionState.LOST)){
+                        log.info("客户端连接丢失");
+                    }
+                }
+                catch (Exception e){
+                    log.error(e.getMessage());
                 }
             }
         };
         return  listener;
     }
 
+
     @Bean
-    public InterProcessMutex zklock(){
-        return new InterProcessMutex(zkClient(),lockPath);
+    public InterProcessSemaphoreMutex zklock(){
+        return new InterProcessSemaphoreMutex (zkClient(),lockPath);
     }
 }
