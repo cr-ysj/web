@@ -1,6 +1,6 @@
 package com.example.demo.config.security.handler;
 
-import com.example.demo.service.IResourceService;
+import com.example.demo.service.resource.IResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;

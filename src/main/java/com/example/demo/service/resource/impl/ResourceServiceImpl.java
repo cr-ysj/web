@@ -1,9 +1,9 @@
-package com.example.demo.service.impl;
+package com.example.demo.service.resource.impl;
 
-import com.example.demo.dao.ResourceMapper;
-import com.example.demo.pojo.Auth;
-import com.example.demo.pojo.Resource;
-import com.example.demo.service.IResourceService;
+import com.example.demo.dao.resource.ResourceMapper;
+import com.example.demo.pojo.db.auth.Auth;
+import com.example.demo.pojo.db.resource.Resource;
+import com.example.demo.service.resource.IResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

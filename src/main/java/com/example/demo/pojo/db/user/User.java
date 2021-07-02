@@ -1,16 +1,22 @@
-package com.example.demo.pojo;
+package com.example.demo.pojo.db.user;
 
+import com.example.demo.pojo.db.auth.Auth;
+import com.example.demo.pojo.BaseDomain;
+import com.example.demo.pojo.db.role.Role;
+import com.example.demo.pojo.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+@JsonIgnoreProperties(value = {"handler"})
 @Data
 @ToString
-public class User extends BaseDomain {
+public class User implements Serializable {
 
     public User(){
 
@@ -33,6 +39,8 @@ public class User extends BaseDomain {
 
 
     private String phone;
+
+    private UserStatus userStatus;
 
 
     //角色列表

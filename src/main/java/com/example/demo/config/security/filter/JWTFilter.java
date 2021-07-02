@@ -1,11 +1,8 @@
 package com.example.demo.config.security.filter;
 
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.json.JSONUtil;
-import com.example.demo.dao.UserMapper;
-import com.example.demo.pojo.Auth;
-import com.example.demo.pojo.Role;
-import com.example.demo.pojo.User;
+import com.example.demo.dao.user.UserMapper;
+import com.example.demo.pojo.db.user.User;
 import com.example.demo.pojo.constant.GlobalConstant;
 import com.example.demo.utils.JsonUtils;
 import com.example.demo.utils.RedisUtils;
@@ -14,45 +11,22 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateFormatUtils;
-import org.redisson.Redisson;
-import org.redisson.RedissonRedLock;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AccountExpiredException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.security.web.authentication.AuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Key;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("all")
 @Component
@@ -71,33 +45,6 @@ public class JWTFilter   extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-       /* Config config = new Config();
-        config.useSingleServer()
-                .setAddress("redis://127.0.0.1:6379");
-        RedissonClient redissonClient = Redisson.create(config);
-        String resourceName="REDLOCK_KEY";
-        RLock lock= redissonClient.getLock(resourceName);
-        RedissonRedLock redLock = new RedissonRedLock(lock);
-        boolean isLock;
-        try { // isLock = redLock.tryLock(); // 500ms拿不到锁, 就认为获取锁失败。10000ms即10s是锁失效时间。
-            isLock = redLock.tryLock(500, 10000, TimeUnit.MILLISECONDS);
-            log.info("lock is "+isLock);
-            if (isLock) {
-                log.info("JWTFilter  doFilterInternal  :time:"+ DateFormatUtils.format(new Date(),"yyyy-MM-dd hh:mm:ss"));
-                //从url中根据参数获取值
-                String jwt = obtainParameter(request, GlobalConstant.jwt);
-                Authentication authentication=null;
-                if (StringUtils.hasText(jwt)) {
-                    getAuthentication( jwt ,response);
-
-                }
-                filterChain.doFilter(request, response);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        } finally {
-            redLock.unlock();
-        }*/
         log.info("JWTFilter  doFilterInternal  :time:"+ DateFormatUtils.format(new Date(),"yyyy-MM-dd hh:mm:ss"));
         //从url中根据参数获取值
         String jwt = obtainParameter(request, GlobalConstant.jwt);
@@ -105,11 +52,6 @@ public class JWTFilter   extends OncePerRequestFilter {
             getAuthentication( jwt ,response);
 
         }
-      /*  Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        if(!StringUtils.hasText(jwt)&&authentication!=null){
-            SecurityContextHolder.getContext().setAuthentication(null);
-        }
-        request.getSession().removeAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);*/
         filterChain.doFilter(request, response);
     }
 
@@ -148,7 +90,6 @@ public class JWTFilter   extends OncePerRequestFilter {
                 claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             }
             catch (io.jsonwebtoken.ExpiredJwtException e){
-                //todo 需要做压测显示出线程安全问题
                 log.error("认证过期:刷新令牌");
                 //刷新令牌
                 String newToken=createJWT(token, GlobalConstant.tokenValidityInMilliseconds);

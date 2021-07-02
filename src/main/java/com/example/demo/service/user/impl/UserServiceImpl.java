@@ -1,17 +1,17 @@
-package com.example.demo.service.impl;
+package com.example.demo.service.user.impl;
 
-import com.example.demo.dao.UserMapper;
-import com.example.demo.pojo.Auth;
-import com.example.demo.pojo.Role;
-import com.example.demo.pojo.User;
-import com.example.demo.service.IUserService;
+import com.example.demo.dao.user.UserMapper;
+import com.example.demo.pojo.db.user.User;
+import com.example.demo.service.user.IUserService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,4 +39,22 @@ public class UserServiceImpl implements IUserService {
     }
 
 
+    @Override
+    public User findByUserNameEnable(User reqUser) {
+        return userMapper.findByUserNameEnable(reqUser);
+    }
+
+    @Transactional
+    @Override
+    public void saveUser(User reqUser) {
+        userMapper.saveUser(reqUser);
+    }
+
+    @Override
+    public PageInfo getUserList(int page, int pageSize) {
+        PageHelper.startPage(page, pageSize);//改写语句实现分页查询
+        List<User> list= userMapper.getUserList();
+        PageInfo<User> pageBean=new PageInfo<>(list);
+        return pageBean;
+    }
 }

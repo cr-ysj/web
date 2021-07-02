@@ -1,9 +1,10 @@
-package com.example.demo.pojo;
+package com.example.demo.pojo.db.resource;
 
+import com.example.demo.pojo.BaseDomain;
+import com.example.demo.pojo.db.auth.Auth;
 import lombok.Data;
 import lombok.ToString;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

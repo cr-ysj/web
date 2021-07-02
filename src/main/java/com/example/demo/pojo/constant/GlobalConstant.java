@@ -10,12 +10,16 @@ public class GlobalConstant {
     public static String loginUrl="/login";
     //登录的url
     public static String doLoginUrl="/doLogin";
+
+    public static String doRegister="/doRegister";
     //忽略的urls
-    public static String[] ignoringUrls={doLoginUrl,loginUrl};
+    public static String[] ignoringUrls={doLoginUrl,loginUrl,doRegister};
     //无权限状态码
     public static int noAuthCode=501;
     //登录失效
     public static int accountExpired=502;
+    //未登录
+    public static int noLogin=503;
     //成功状态码
     public static int successCode=200;
     //重复登录状态码
@@ -38,9 +42,9 @@ public class GlobalConstant {
 
     public static  long hour=60*min;
     //令牌刷新时间
-    public static long tokenValidityInMilliseconds=10;
+    public static long tokenValidityInMilliseconds=30*min;
     //登录过期时间
-    public static long TokenExpireTime=60*30;
+    public static long TokenExpireTime=60*min;
     //POST
     public static String httpMethod_POST="POST";
 

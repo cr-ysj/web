@@ -6,7 +6,9 @@ import com.example.demo.config.security.handler.AuthAccessDeniedHandler;
 import com.example.demo.config.security.handler.LoginFailureHandler;
 import com.example.demo.config.security.handler.LoginSuccessHandler;
 import com.example.demo.pojo.constant.GlobalConstant;
-import com.example.demo.service.IUserService;
+import com.example.demo.pojo.response.ResponseResult;
+import com.example.demo.service.user.IUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,15 +25,21 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @SuppressWarnings("all")
@@ -67,17 +75,29 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(GlobalConstant.ignorings);
     }
-
-    //跳转到登录界面
+    //返回未登录
     @Bean
-    public LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint(String loginFormUrl){
-        return  new   LoginUrlAuthenticationEntryPoint(loginFormUrl) {
+    public AuthenticationEntryPoint macLoginUrlAuthenticationEntryPoint() {
+        return new AuthenticationEntryPoint() {
             @Override
-            protected String determineUrlToUseForThisRequest(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) {
-                return this.getLoginFormUrl();
+            public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+                try {
+                    response.setContentType("application/json;charset=utf-8");
+                    ObjectMapper mapper=new ObjectMapper();
+                    // 添加一个map对象，方便等下转换成字符串
+                    ResponseResult result = new ResponseResult(GlobalConstant.noLogin+"", "未登录", null);
+                    PrintWriter out = response.getWriter();
+                    out.write(mapper.writeValueAsString(result));
+                    out.flush();
+                    out.close();
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         };
     }
+
     /**
      * 注册bean sessionRegistry
      */
@@ -105,7 +125,6 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
             new org.springframework.security.web.header.Header("Access-Control-Allow-Headers","Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"),
             new org.springframework.security.web.header.Header("Access-Control-Allow-Credentials","true"),
             new org.springframework.security.web.header.Header("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH")
-
     ));
 
 
@@ -142,7 +161,7 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedHandler(authAccessDeniedHandler).and()
                 .csrf().disable()//关闭csrf
                 .httpBasic().and()
-                .exceptionHandling().authenticationEntryPoint(loginUrlAuthenticationEntryPoint(GlobalConstant.loginUrl))//登录页面
+                .exceptionHandling().authenticationEntryPoint(macLoginUrlAuthenticationEntryPoint())//未登录
                 .and()
                 .authorizeRequests()
                 .antMatchers(matchUrl.toArray(new String[matchUrl.size()])).permitAll()//忽略的url

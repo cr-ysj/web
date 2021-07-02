@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.task;
 
 public interface IScheduleJobService {
     //初始化任务调度

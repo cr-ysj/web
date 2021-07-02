@@ -1,7 +1,9 @@
 package com.example.demo.config.datasource;
 
 import com.example.demo.pojo.enums.BaseEnum;
+import com.example.demo.pojo.enums.DelStatus;
 import com.example.demo.pojo.enums.JobStatus;
+import com.example.demo.pojo.enums.UserStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
@@ -12,7 +14,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-@MappedTypes(value = {JobStatus.class})
+@MappedTypes(value = {JobStatus.class, UserStatus.class, DelStatus.class})
 @Slf4j
 public class EnumTypeHandler extends BaseTypeHandler<BaseEnum> {
 
