@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.role.RoleMapper">
+
+
+    <!--方式一：一对多嵌套查询-->
+    <resultMap id="Roles" type="com.example.demo.pojo.db.role.Role">
+        <id column="roleId" property="id"></id>
+        <result column="role_name" property="roleName"></result>
+        <result column="roledescription" property="description"></result>
+        <result column="description" property="description"></result>
+        <result column="description" property="description"></result>
+        <result column="is_del" javaType="com.example.demo.pojo.enums.DelStatus" property="delStatus" typeHandler="com.example.demo.config.datasource.EnumTypeHandler"/>
+        <collection property="authList" ofType="com.example.demo.pojo.db.auth.Auth" column="roleId"
+                    select="com.example.demo.dao.role.RoleMapper.findAuthByRoleId">
+        </collection>
+    </resultMap>
+
+    <resultMap id="Auth" type="com.example.demo.pojo.db.auth.Auth">
+        <id property="id" column="authid"></id>
+        <result property="auth" column="auth"></result>
+        <result property="description" column="authdescription"></result>
+    </resultMap>
+    <select id="getRoleList" resultMap="Roles">
+            select  a.id as roleId , a.role_name ,a.description  as roledescription,a.is_del  from sys_role a
+    </select>
+
+    <select id="findAuthByRoleId" resultMap="Auth">
+        select   b.id as authid , b.auth ,b.description as authdescription   ,c.role_id as role_id from sys_auth b ,sys_role_auth c where  b.id=c.auth_id
+        and  c.role_id=#{roleId}
+    </select>
+
+    <insert id="saveRole" parameterType="com.example.demo.pojo.db.role.Role">
+        <selectKey  keyProperty="id" resultType="long" order="BEFORE">
+            SELECT seq_sys_role.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_role (id,role_name,description,is_del) values
+        ( #{id},#{roleName},#{description},'1')
+    </insert>
+
+    <insert id ="saveRoleAndAuths" parameterType="java.util.List" >
+
+        insert into sys_role_auth (id, auth_id, role_id)
+        select seq_sys_role_auth.NEXTVAL, A.*  from(
+        <foreach collection="list" item="item" index="index"
+                 separator="UNION ALL">
+            SELECT #{item.id,jdbcType=INTEGER},#{item.roleId,jdbcType=INTEGER}    FROM  dual
+        </foreach>
+        ) A
+    </insert >
+
+
+
+    <delete id="delByRoleIds" parameterType="java.util.List">
+        delete from sys_role
+        where id IN
+        <foreach collection="roids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="removeAuthByRoleIds" parameterType="java.util.List">
+         delete  from sys_role_auth where role_id  in
+        <foreach collection="roids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="removeRoleByRoleIds" parameterType="java.util.List">
+        delete  from sys_user_role where role_id  in
+        <foreach collection="roids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="removeAuthByRoleId"  parameterType="com.example.demo.pojo.db.role.Role">
+         delete  from sys_role_auth where role_id =#{id}
+    </delete>
+    <update id="stopByRoleIds" parameterType="java.util.List">
+        update  sys_role set is_del='2'  where id  in
+        <foreach collection="roids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+    <update id="startRolesByRoleId"  parameterType="java.util.List">
+        update  sys_role set is_del='1'  where id  in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateRole" parameterType="com.example.demo.pojo.db.role.Role">
+        update  sys_role set role_name=#{roleName},description=#{description}  where id =#{id}
+    </update>
+</mapper>

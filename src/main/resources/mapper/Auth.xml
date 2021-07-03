@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.auth.AuthMapper">
+
+
+    <!--方式一：一对多嵌套查询-->
+    <resultMap id="Auths" type="com.example.demo.pojo.db.auth.Auth">
+        <id column="id" property="id"></id>
+        <result column="auth" property="auth"></result>
+        <result column="authdescription" property="description"></result>
+        <collection property="resources" ofType="com.example.demo.pojo.db.resource.Resource" column="id"
+                    select="com.example.demo.dao.auth.AuthMapper.findResourceByAuthId">
+        </collection>
+    </resultMap>
+
+    <select id="getAuthList" resultMap="Auths">
+           select a.id as id ,a.auth, a.description as authdescription from sys_auth a
+    </select>
+
+
+    <resultMap id="Resource" type="com.example.demo.pojo.db.resource.Resource">
+        <id property="id" column="resourceid"></id>
+        <result property="resourceName" column="resource_name"></result>
+        <result property="path" column="path"></result>
+        <result property="description" column="resourcedescription"></result>
+    </resultMap>
+
+    <select id="findResourceByAuthId" resultMap="Resource">
+       select   c.id as resourceid , c.resource_name ,c.path,c.description as resourcedescription
+        from  sys_resource_auth b,sys_resource c where  b.resource_id =c.id  AND b.auth_id=#{id}
+     </select>
+
+
+    <insert id="saveAuth"  parameterType="com.example.demo.pojo.db.auth.Auth">
+        <selectKey  keyProperty="id" resultType="long" order="BEFORE">
+            SELECT seq_sys_auth.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_auth (id,auth,description) values
+                             ( #{id},#{auth},#{description})
+    </insert>
+    <insert id ="saveAuthAndResources" parameterType="java.util.List" >
+
+        insert into sys_resource_auth (id, auth_id, resource_id)
+        select seq_sys_resource_auth.NEXTVAL, A.*  from(
+        <foreach collection="list" item="item" index="index"
+                 separator="UNION ALL">
+            SELECT #{item.authId},#{item.id}    FROM  dual
+        </foreach>
+        ) A
+    </insert >
+
+
+    <delete id="delAuths" parameterType="java.util.List">
+        delete from sys_auth
+        where id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="removeRoleAndAuthByAuthIds" parameterType="java.util.List">
+        delete from sys_role_auth
+        where auth_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="removeAuthAndResourceByAuthIds" parameterType="java.util.List">
+        delete from sys_resource_auth
+        where auth_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="editAuth"  parameterType="com.example.demo.pojo.db.auth.Auth">
+        update  sys_auth set auth=#{auth}, description=#{description}  where id  =#{id}
+    </update>
+
+    <delete id="removeAuthAndResourceByAuthId"  parameterType="com.example.demo.pojo.db.auth.Auth">
+          delete  from sys_resource_auth  where auth_id  =#{id}
+    </delete>
+
+</mapper>
