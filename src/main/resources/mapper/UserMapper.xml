@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.example.demo.dao.UserMapper">
+<mapper namespace="com.example.demo.dao.user.UserMapper">
 
-    <resultMap id="User" type="com.example.demo.pojo.User">
+    <resultMap id="User" type="com.example.demo.pojo.db.user.User">
         <id column="id" property="id"></id>
         <result column="username" property="username"></result>
         <result column="password" property="password"></result>
         <result column="cust_name" property="nikName"></result>
         <result column="phone" property="phone"></result>
-        <collection property="roleList" ofType="com.example.demo.pojo.Role" javaType="ArrayList">
+        <result column="email" property="email"></result>
+        <result column="status" javaType="com.example.demo.pojo.enums.UserStatus" property="userStatus" typeHandler="com.example.demo.config.datasource.EnumTypeHandler"/>
+        <collection property="roleList" ofType="com.example.demo.pojo.db.role.Role" javaType="ArrayList">
             <id property="id" column="roleId"></id>
             <result property="roleName" column="roleName"></result>
-            <collection property="authList" ofType="com.example.demo.pojo.Auth" javaType="ArrayList">
+            <collection property="authList" ofType="com.example.demo.pojo.db.auth.Auth" javaType="ArrayList">
                 <id property="roleId" column="authId"></id>
                 <id property="id" column="authId"></id>
                 <result property="auth" column="auth"></result>
@@ -21,11 +23,71 @@
         </collection>
     </resultMap>
 
-    <select id="getUserByUsername" resultMap="User" parameterType="com.example.demo.pojo.User">
-         select a.id,b.id as roleId ,d.id as authId,username ,password,email,cust_name ,phone ,d.auth,d.description
-         from
-         sys_user a ,sys_role b,sys_user_role c,sys_auth d, sys_role_auth e
-         where a.id =c.user_id and b.id=c.role_id and b.id=e.role_id  and d.id=e.auth_id
-         and username=#{username}
-          </select>
+    <select id="getUserByUsername" resultMap="User" parameterType="com.example.demo.pojo.db.user.User">
+               select a.id ,username ,password,email,cust_name ,phone ,roleId ,auth,description ,authId from sys_user  a left join
+          (select b.id as roleId ,d.id as authId,d.auth,d.description ,c.user_id from sys_role b ,sys_user_role  c ,sys_auth  d,sys_role_auth e  where  b.id=c.role_id and b.id=e.role_id  and d.id=e.auth_id)  f
+          on a.id =f.user_id where  username=#{username} and status='1'
+      </select>
+
+    <select id="findByUserNameEnable" resultMap="User" parameterType="com.example.demo.pojo.db.user.User">
+        select id ,username from sys_user where username=#{username} and status='1'
+    </select>
+    <insert id="saveUser" parameterType="com.example.demo.pojo.db.user.User">
+        <selectKey  keyProperty="id" resultType="long" order="BEFORE">
+            SELECT seq_sys_user.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_user (id,username,password,cust_name,email,phone,status) values
+	      ( #{id},#{username},#{password},#{nikName},#{email},#{phone},#{userStatus,typeHandler=com.example.demo.config.datasource.EnumTypeHandler})
+    </insert>
+
+
+    <resultMap id="getUserList" type="com.example.demo.pojo.db.user.User">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="cust_name" property="nikName"></result>
+        <result column="phone" property="phone"></result>
+        <result column="email" property="email"></result>
+        <result column="status" javaType="com.example.demo.pojo.enums.UserStatus" property="userStatus" typeHandler="com.example.demo.config.datasource.EnumTypeHandler"/>
+        <collection property="roleList" ofType="com.example.demo.pojo.db.role.Role" column="id"
+                    select="com.example.demo.dao.user.UserMapper.findRoleByUserId">
+        </collection>
+    </resultMap>
+
+
+    <resultMap id="Role" type="com.example.demo.pojo.db.role.Role">
+        <id property="id" column="id"></id>
+        <result property="roleName" column="role_name"></result>
+        <result property="description" column="description"></result>
+    </resultMap>
+    <select id="findRoleByUserId" resultMap="Role">
+           select a.id ,role_name ,a.description  from sys_role a ,sys_user_role b where a.id =b.role_id and
+            b.user_id =#{id}
+     </select>
+
+    <select id="getUserList" resultMap="getUserList">
+        select id ,username ,phone,email ,cust_name,status from sys_user
+    </select>
+
+    <insert id="grantRole" parameterType="java.util.Map">
+        insert into sys_user_role (id, user_id, role_id)
+        select seq_sys_user_role.NEXTVAL, A.*  from(
+        <foreach collection="roleIds" item="item" index="index"
+                 separator="UNION ALL">
+            SELECT #{userId},  #{item}    FROM  dual
+        </foreach>
+        ) A
+    </insert>
+
+    <update id="start" parameterType="java.lang.Integer">
+          update sys_user set status= '1' where id =#{id}
+    </update>
+
+    <update id="stop" parameterType="java.lang.Integer">
+          update sys_user set status= '2' where id =#{id}
+    </update>
+
+    <delete id="removeRoleByUserId"  parameterType="java.lang.Integer" >
+        delete  from sys_user_role where user_id =#{id}
+    </delete>
 </mapper>

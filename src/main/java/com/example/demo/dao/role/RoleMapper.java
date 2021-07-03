@@ -14,4 +14,18 @@ public interface RoleMapper {
     void saveRole(Role role);
 
     void saveRoleAndAuths(List<Auth> authList);
+
+    void delByRoleIds(List roids);
+
+    void removeAuthByRoleIds(List roids);
+
+    void stopByRoleIds(List roids);
+
+    void removeRoleByRoleIds(List roids);
+
+    void startRolesByRoleId(List list);
+
+    void updateRole(Role role);
+
+    void removeAuthByRoleId(Role role);
 }

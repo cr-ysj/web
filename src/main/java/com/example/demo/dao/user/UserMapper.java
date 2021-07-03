@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import tk.mybatis.mapper.common.BaseMapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
@@ -15,4 +16,12 @@ public interface UserMapper extends BaseMapper<User> {
     void saveUser(User user);
 
     List<User> getUserList();
+
+    void grantRole(Map map);
+
+    void start(Integer id);
+
+    void stop(Integer id);
+
+    void removeRoleByUserId(Integer id);
 }
