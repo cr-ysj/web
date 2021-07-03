@@ -4,8 +4,11 @@ import com.example.demo.dao.resource.ResourceMapper;
 import com.example.demo.pojo.db.auth.Auth;
 import com.example.demo.pojo.db.resource.Resource;
 import com.example.demo.service.resource.IResourceService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -43,4 +46,35 @@ public class ResourceServiceImpl implements IResourceService {
         }
         return result;
     }
+
+    @Override
+    public PageInfo getResourceList(int page, int pageSize) {
+        PageHelper.startPage(page, pageSize);//改写语句实现分页查询
+        List<Resource> list= resourceMapper.getResourceList();
+        PageInfo<Resource> pageBean=new PageInfo(list);
+        return pageBean;
+    }
+
+    @Transactional
+    @Override
+    public void saveResource(Resource resource) {
+        resourceMapper.saveResource(resource);
+    }
+
+    @Transactional
+    @Override
+    public void delReources(List list) {
+        //删除资源
+        resourceMapper.deleteResources(list);
+        //删除资源和权限关联
+        resourceMapper.removeAuthAndResourceByResourceIds(list);
+    }
+
+    @Transactional
+    @Override
+    public void editResource(Resource resource) {
+        resourceMapper.editResource(resource);
+    }
+
+
 }
