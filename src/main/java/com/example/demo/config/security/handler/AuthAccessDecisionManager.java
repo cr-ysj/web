@@ -20,6 +20,9 @@ import java.util.Iterator;
 @Slf4j
 @Component
 public class AuthAccessDecisionManager implements AccessDecisionManager {
+    public AuthAccessDecisionManager(){
+        super();
+    }
 
     /**
      * decide 方法是判定是否拥有权限的决策方法，

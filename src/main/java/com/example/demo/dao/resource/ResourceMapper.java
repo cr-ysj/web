@@ -10,4 +10,14 @@ import java.util.List;
 public interface ResourceMapper  extends BaseMapper<Resource> {
 
     List<Resource> getAllResources();
+
+    List<Resource> getResourceList();
+
+    void saveResource(Resource resource);
+
+    void deleteResources(List list);
+
+    void removeAuthAndResourceByResourceIds(List list);
+
+    void editResource(Resource resource);
 }

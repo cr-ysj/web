@@ -28,5 +28,9 @@ public class Resource  extends BaseDomain implements Serializable {
     //权限
     private List<Auth> authList=new ArrayList<>();
 
+    //权限ids
     private List<Long> authIds;
+    //权限id
+    private Long authId;
+
 }

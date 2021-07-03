@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @SuppressWarnings("all")
@@ -56,5 +57,24 @@ public class UserServiceImpl implements IUserService {
         List<User> list= userMapper.getUserList();
         PageInfo<User> pageBean=new PageInfo<>(list);
         return pageBean;
+    }
+
+    @Transactional
+    @Override
+    public void grantRole(Map map) {
+        userMapper.removeRoleByUserId(Integer.valueOf(map.get("userId").toString()));
+        userMapper.grantRole(map);
+    }
+
+    @Transactional
+    @Override
+    public void start(Integer id) {
+        userMapper.start(id);
+    }
+
+    @Transactional
+    @Override
+    public void stop(Integer id) {
+        userMapper.stop(id);
     }
 }
