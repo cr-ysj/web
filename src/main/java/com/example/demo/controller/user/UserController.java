@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
+
 @SuppressWarnings("all")
 @Slf4j
 @Controller
@@ -67,9 +69,43 @@ public class UserController {
 
 
     @ResponseBody
-    @RequestMapping("/authMapping/savePage")
-    public String test(){
+    @RequestMapping("/user/grantRole")
+    public ResponseResult grantRole(@RequestBody Map map){
+        try {
+            userService.grantRole(map);
+            return new ResponseResult("200", "授权成功", null);
 
-        return "aaa";
+        }
+        catch (Exception e){
+            log.error("授权失败:{}",e);
+            return new ResponseResult("500", "授权失败请重试", null);
+        }
+    }
+    @ResponseBody
+    @RequestMapping("/user/start")
+    public ResponseResult start(Integer id){
+        try {
+            userService.start(id);
+            return new ResponseResult("200", "启用成功", null);
+
+        }
+        catch (Exception e){
+            log.error("启用失败:{}",e);
+            return new ResponseResult("500", "启用失败请重试", null);
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping("/user/stop")
+    public ResponseResult stop(Integer id){
+        try {
+            userService.stop(id);
+            return new ResponseResult("200", "停用成功", null);
+
+        }
+        catch (Exception e){
+            log.error("授权失败:{}",e);
+            return new ResponseResult("500", "停用失败请重试", null);
+        }
     }
 }

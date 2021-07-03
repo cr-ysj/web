@@ -51,7 +51,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler i
         //存入redis中(设置过期时间) 数据结构hash结构   key -token   auth-auth
         String jwt = jwtFilter.createJWT(authentication.getName(), GlobalConstant.tokenValidityInMilliseconds);
         redisUtils.setHash(key,GlobalConstant.jwt,jwt,GlobalConstant.TokenExpireTime);
-        String principal = JSONUtil.toJsonStr(authentication.getPrincipal());
+        String principal = JSONUtil.toJsonStr(authentication);
         redisUtils.setHash(key,GlobalConstant.auths, principal,GlobalConstant.TokenExpireTime);
         json.put(GlobalConstant.jwt,key);
         json.put("code",GlobalConstant.successCode);

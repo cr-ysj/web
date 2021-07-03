@@ -5,6 +5,7 @@ import com.example.demo.config.security.filter.JWTFilter;
 import com.example.demo.config.security.handler.AuthAccessDeniedHandler;
 import com.example.demo.config.security.handler.LoginFailureHandler;
 import com.example.demo.config.security.handler.LoginSuccessHandler;
+import com.example.demo.config.security.handler.interceptor.CustomerAuthFilterSecurityInterceptor;
 import com.example.demo.pojo.constant.GlobalConstant;
 import com.example.demo.pojo.response.ResponseResult;
 import com.example.demo.service.user.IUserService;
@@ -26,6 +27,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -109,6 +111,9 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
     //无权限处理器
     @Autowired AuthAccessDeniedHandler authAccessDeniedHandler;
 
+    @Autowired
+    private CustomerAuthFilterSecurityInterceptor customerAuthFilterSecurityInterceptor;
+
     //登录处理过滤器
     @Autowired
     private AbstractAuthenticationProcessingFilter authenticationFilter;
@@ -177,6 +182,9 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
                 .and().addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         authenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler);
         authenticationFilter.setAuthenticationFailureHandler(loginFailureHandler);
+        //权限处理
+        http.addFilterBefore(customerAuthFilterSecurityInterceptor, FilterSecurityInterceptor.class);
+
     }
 
 

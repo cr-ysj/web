@@ -34,14 +34,16 @@ public class CustomerSecurityMetadataSource implements FilterInvocationSecurityM
         Map<String, List<String>> resourceAuth = resourceService.getAuthAndResource();
         Iterator<String> iterator = resourceAuth.keySet().iterator();
         String resoucePath = null;
-        Collection<ConfigAttribute> attributes=new ArrayList<>();
         while (iterator.hasNext()) {
+            Collection<ConfigAttribute> attributes=new ArrayList<>();
             //资源路径
             resoucePath = iterator.next();
             //权限
             List<String> auths = resourceAuth.get(resoucePath);
             for (int i = 0; i <auths.size() ; i++) {
-                attributes.add(new SecurityConfig(auths.get(i)));
+                if(!attributes.contains(new SecurityConfig(auths.get(i)))){
+                    attributes.add(new SecurityConfig(auths.get(i)));
+                }
             }
             map.put(resoucePath, attributes);
         }
