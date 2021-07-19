@@ -2,7 +2,6 @@ package com.example.demo.config.security.filter;
 
 import cn.hutool.json.JSONUtil;
 import com.example.demo.dao.user.UserMapper;
-import com.example.demo.pojo.db.role.Role;
 import com.example.demo.pojo.db.user.User;
 import com.example.demo.pojo.constant.GlobalConstant;
 import com.example.demo.utils.JsonUtils;
@@ -100,7 +99,7 @@ public class JWTFilter   extends OncePerRequestFilter {
             Object hash = redisUtils.getHash(jwt, GlobalConstant.auths);
             User user = JSONUtil.toBean(String.valueOf(hash), User.class);
             // 2. 设置权限
-            Collection<GrantedAuthority> grantedAuthorities =   user.getAuthorities(((List)JSONUtil.toBean(String.valueOf(hash), Map.class).get("authorities")));
+            Collection<GrantedAuthority> grantedAuthorities =   user.getAuthorities(user.authorities);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, token, grantedAuthorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

@@ -7,11 +7,10 @@ import com.example.demo.utils.RedisUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
@@ -19,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -51,10 +51,12 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler i
         //存入redis中(设置过期时间) 数据结构hash结构   key -token   auth-auth
         String jwt = jwtFilter.createJWT(authentication.getName(), GlobalConstant.tokenValidityInMilliseconds);
         redisUtils.setHash(key,GlobalConstant.jwt,jwt,GlobalConstant.TokenExpireTime);
-        String principal = JSONUtil.toJsonStr(authentication);
+        User user = (User) authentication.getPrincipal();
+        String principal = JSONUtil.toJsonStr(user);
         redisUtils.setHash(key,GlobalConstant.auths, principal,GlobalConstant.TokenExpireTime);
         json.put(GlobalConstant.jwt,key);
         json.put("code",GlobalConstant.successCode);
+        json.put("username",user.getUsername());
         PrintWriter out = resp.getWriter();
         out.write(mapper.writeValueAsString(json));
         out.println();

@@ -3,14 +3,17 @@ package com.example.demo.service.resource.impl;
 import com.example.demo.dao.resource.ResourceMapper;
 import com.example.demo.pojo.db.auth.Auth;
 import com.example.demo.pojo.db.resource.Resource;
+import com.example.demo.pojo.enums.OptionLog;
 import com.example.demo.service.resource.IResourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
+
+import static com.example.demo.pojo.constant.GlobalConstant.optionModel_Resource;
+import static com.example.demo.pojo.constant.GlobalConstant.optionType_View;
 
 @SuppressWarnings("all")
 @Service
@@ -46,6 +49,7 @@ public class ResourceServiceImpl implements IResourceService {
         }
         return result;
     }
+
 
     @Override
     public PageInfo getResourceList(int page, int pageSize) {

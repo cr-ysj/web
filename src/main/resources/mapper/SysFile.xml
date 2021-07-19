@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.file.FileMapper">
+
+
+
+
+    <resultMap id="sysFile" type="com.example.demo.pojo.db.file.SystemFile">
+        <id property="id" column="id"></id>
+        <result property="groupName" column="group_Name"></result>
+        <result property="path" column="path"></result>
+        <result property="fileType" column="file_Type" javaType="com.example.demo.pojo.enums.FileType"  typeHandler="com.example.demo.config.datasource.EnumTypeHandler"></result>
+        <result property="fileName" column="file_Name"></result>
+        <result property="createUser" column="create_User"></result>
+        <result property="createDate" column="create_Date"></result>
+        <result property="description" column="description"></result>
+        <result property="fileSize" column="file_Size"></result>
+        <result property="originalFilename" column="original_Filename"></result>
+        <result property="originalFiletype" column="original_Filetype"></result>
+
+    </resultMap>
+      <select id="getFileList" parameterType="java.util.Map" resultMap="sysFile">
+    SELECT  id ,
+            group_Name,
+            path  ,
+            create_User,
+            file_Type  ,
+            file_Name  ,
+            create_Date,
+            description,
+            file_Size ,original_Filename ,original_Filetype FROM SYS_FILE
+    </select>
+    <insert id="saveFile" parameterType="com.example.demo.pojo.db.file.SystemFile">
+        <selectKey  keyProperty="id" resultType="long" order="BEFORE">
+            SELECT SEQ_SYS_File.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_file (id,group_Name,path,create_User,file_Type,file_Name,create_Date,
+        file_Size,description,original_Filename,original_Filetype) values
+        ( #{id},#{groupName},#{path},#{createUser},#{fileType,typeHandler=com.example.demo.config.datasource.EnumTypeHandler},
+         #{fileName},#{createDate},#{fileSize},#{description},#{originalFilename},#{originalFiletype})
+    </insert>
+    <delete id="delFile"  parameterType="com.example.demo.pojo.db.file.SystemFile">
+        delete  from sys_file where id =#{id};
+    </delete>
+
+    <delete id="delFiles" parameterType="java.util.List">
+        delete from sys_file
+        where id IN
+        <foreach collection="files" item="file" open="(" separator="," close=")">
+            #{file.id}
+        </foreach>
+    </delete>
+</mapper>

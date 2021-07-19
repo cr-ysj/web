@@ -11,9 +11,12 @@ public class GlobalConstant {
     //登录的url
     public static String doLoginUrl="/doLogin";
 
+    //websocket
+    public static String websocketService="/ws/WebSocketServer";
+    //注册
     public static String doRegister="/doRegister";
     //忽略的urls
-    public static String[] ignoringUrls={doLoginUrl,loginUrl,doRegister};
+    public static String[] ignoringUrls={doLoginUrl,loginUrl,doRegister,websocketService};
     //无权限状态码
     public static int noAuthCode=501;
     //登录失效
@@ -47,5 +50,22 @@ public class GlobalConstant {
     public static long TokenExpireTime=60*min;
     //POST
     public static String httpMethod_POST="POST";
+
+    //存入redis的资源列表
+    public static String authAttributes="authAttributes";
+
+    public static final String optionType_View="查看";
+    public static final String optionType_Save="新增";
+    public static final String optionType_Del="删除";
+    public static final String optionType_Edit="编辑";
+
+
+    public static final String optionModel_Resource="资源";
+    public static final String optionModel_Auth="权限";
+    public static final String optionModel_User="用户";
+    public static final String optionModel_Role="角色";
+
+
+    public static final Boolean isOptionError=true;
 
 }

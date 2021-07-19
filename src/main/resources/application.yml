@@ -6,9 +6,9 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:oracle:thin:@192.168.8.128:1521:orcl
-    username: crweb
-    password: crweb
+    url: jdbc:oracle:thin:@192.168.137.129:1521:helowin
+    username: root
+    password: root
     driver_class_name: oracle.jdbc.driver.OracleDriver
     type: com.alibaba.druid.pool.DruidDataSource
     max-active: 20
@@ -23,7 +23,7 @@ spring:
     poolPreparedStatements: true
   redis:
     database: 0
-    host: localhost
+    host: 192.168.137.129
     port: 6379
     password:
     jedis:
@@ -44,3 +44,11 @@ pagehelper:
   support-methods-arguments: true
   params: count==countSql
   page-size-zero: true
+fdfs:
+  connect-timeout: 600
+  so-timeout: 600
+  tracker-list:
+    - 192.168.137.129:22122
+  pool:
+    max-total: 100
+    max-wait-millis: 60

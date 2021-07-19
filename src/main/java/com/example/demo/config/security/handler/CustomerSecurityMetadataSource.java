@@ -1,6 +1,10 @@
 package com.example.demo.config.security.handler;
 
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.example.demo.pojo.constant.GlobalConstant;
 import com.example.demo.service.resource.IResourceService;
+import com.example.demo.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
@@ -23,15 +27,22 @@ public class CustomerSecurityMetadataSource implements FilterInvocationSecurityM
     private HashMap<String, Collection<ConfigAttribute>> map =new HashMap<>();
 
     //资源
+    private Map<String, List<String>> resourceAuth;
+
+    //资源
     @Autowired
     private IResourceService resourceService;
+
+
+    @Autowired
+    private RedisUtils redisUtils;
 
     /**
      * 加载权限表中所有权限
      */
     public void loadResourceDefine() {
-        //获取权限资源
-        Map<String, List<String>> resourceAuth = resourceService.getAuthAndResource();
+        resourceAuth = resourceService.getAuthAndResource();
+        //存入radis
         Iterator<String> iterator = resourceAuth.keySet().iterator();
         String resoucePath = null;
         while (iterator.hasNext()) {
@@ -54,8 +65,6 @@ public class CustomerSecurityMetadataSource implements FilterInvocationSecurityM
     /**
      *
      * 用来判定用户是否有此权限。如果不在权限表中则放行
-     *
-     *
      *获取某个受保护的安全对象object的所需要的权限信息,是一组ConfigAttribute对象的集合，
      * 如果该安全对象object不被当前SecurityMetadataSource对象支持,则抛出异常IllegalArgumentException。
      * 该方法通常配合boolean supports(Class<?> clazz)一起使用，先使用boolean supports(Class<?> clazz)确保安全对象能被当前SecurityMetadataSource支持，

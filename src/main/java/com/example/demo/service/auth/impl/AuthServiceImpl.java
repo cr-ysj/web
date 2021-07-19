@@ -1,5 +1,6 @@
 package com.example.demo.service.auth.impl;
 
+import com.example.demo.config.security.handler.CustomerSecurityMetadataSource;
 import com.example.demo.dao.auth.AuthMapper;
 import com.example.demo.dao.role.RoleMapper;
 import com.example.demo.pojo.db.auth.Auth;
@@ -17,6 +18,10 @@ import java.util.List;
 @SuppressWarnings("all")
 @Service
 public class AuthServiceImpl implements IAuthService {
+
+    @Autowired
+    private CustomerSecurityMetadataSource customerSecurityMetadataSource;
+
     @Autowired
     private AuthMapper authMapper;
 
@@ -37,6 +42,8 @@ public class AuthServiceImpl implements IAuthService {
             resources.get(i).setAuthId(auth.getId());
         }
         authMapper.saveAuthAndResources(resources);
+        //重新加载资源列表
+        customerSecurityMetadataSource.loadResourceDefine();
     }
 
     @Transactional
@@ -48,6 +55,8 @@ public class AuthServiceImpl implements IAuthService {
         authMapper.removeRoleAndAuthByAuthIds(list);
         //解除权限和资源绑定
         authMapper.removeAuthAndResourceByAuthIds(list);
+        //重新加载资源列表
+        customerSecurityMetadataSource.loadResourceDefine();
     }
 
 
@@ -64,8 +73,7 @@ public class AuthServiceImpl implements IAuthService {
             resources.get(i).setAuthId(auth.getId());
         }
         authMapper.saveAuthAndResources(resources);
-
+        //重新加载资源列表
+        customerSecurityMetadataSource.loadResourceDefine();
     }
-
-
 }

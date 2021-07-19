@@ -55,7 +55,7 @@ public class ZKClient {
                         namespace(namespace). //名称空间的操作
                 build();
         zkClient.getConnectionStateListenable().addListener(connectionState());
-       // zkClient.start();  todo 测试先关闭
+        zkClient.start();  //todo 测试先关闭
         return  zkClient;
     }
 

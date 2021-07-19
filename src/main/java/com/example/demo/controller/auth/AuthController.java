@@ -1,6 +1,7 @@
 package com.example.demo.controller.auth;
 
 import com.example.demo.pojo.db.auth.Auth;
+import com.example.demo.pojo.enums.OptionLog;
 import com.example.demo.pojo.response.ResponseResult;
 import com.example.demo.service.auth.IAuthService;
 import com.example.demo.service.role.IRoleService;
@@ -14,11 +15,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
+import static com.example.demo.pojo.constant.GlobalConstant.optionModel_Auth;
+import static com.example.demo.pojo.constant.GlobalConstant.optionType_Save;
+import static com.example.demo.pojo.constant.GlobalConstant.optionType_Del;
+import static com.example.demo.pojo.constant.GlobalConstant.optionType_Edit;
+
+
 @Slf4j
 @Controller
 public class AuthController {
     @Autowired
     private IAuthService authService;
+
+
 
     @ResponseBody
     @RequestMapping("/auth/getAuthList")
@@ -28,6 +37,10 @@ public class AuthController {
         return  new ResponseResult("200","查询成功",authService.getAuthList(page,limit));
     }
 
+    @OptionLog(
+            optionModel=optionModel_Auth,
+            optionType= optionType_Save,
+            optionDesc="添加权限")
     @ResponseBody
     @RequestMapping("/auth/saveAuth")
     public ResponseResult saveAuth(@RequestBody Auth auth){
@@ -41,6 +54,11 @@ public class AuthController {
         }
     }
 
+
+    @OptionLog(
+            optionModel=optionModel_Auth,
+            optionType= optionType_Del,
+            optionDesc="删除权限")
     @ResponseBody
     @RequestMapping("/auth/delAuths")
     public ResponseResult delAuths(@RequestParam("ids") List list){
@@ -53,6 +71,11 @@ public class AuthController {
             return  new ResponseResult("500","删除失败",null);
         }
     }
+
+    @OptionLog(
+            optionModel=optionModel_Auth,
+            optionType= optionType_Edit,
+            optionDesc="编辑权限")
     @ResponseBody
     @RequestMapping("/auth/editAuth")
     public ResponseResult editAuth(@RequestBody Auth auth){

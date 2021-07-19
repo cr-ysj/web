@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.demo.dao.log.LogMap">
+
+
+    <insert id="saveLog" parameterType="com.example.demo.pojo.db.log.SysLog">
+        <selectKey  keyProperty="id" resultType="long" order="BEFORE">
+            SELECT seq_sys_log.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_log (id,option_model,option_type,option_desc,option_user,option_func,request_url,
+        request_ip,request_params,response_result,option_time,is_optionerror,error_msg)
+        values( #{id},#{optionModel},#{optionType},#{optionDesc},#{optionUser},#{optionFunc},#{requestUrl},
+        #{requestIp},#{requestParams},#{responseResult},#{optionTime},#{isOptionError},#{errorMsg})
+    </insert>
+
+    <resultMap id="sysLog" type="com.example.demo.pojo.db.log.SysLog">
+        <id property="id" column="id"></id>
+        <result property="optionModel" column="option_model"></result>
+        <result property="optionType" column="option_type"></result>
+        <result property="optionDesc" column="option_desc"></result>
+        <result property="optionFunc" column="option_func"></result>
+        <result property="optionUser" column="option_user"></result>
+        <result property="optionFunc" column="option_func"></result>
+        <result property="requestUrl" column="request_url"></result>
+        <result property="requestIp" column="request_ip"></result>
+        <result property="requestParams" column="request_params"></result>
+        <result property="responseResult" column="response_result"></result>
+        <result property="optionTime" column="option_time"></result>
+        <result property="isOptionError" column="is_optionerror"></result>
+        <result property="errorMsg" column="error_msg"></result>
+
+    </resultMap>
+      <select id="getLogList" parameterType="java.util.Map" resultMap="sysLog">
+
+     select id,option_model,option_type,option_desc,option_user,option_func,request_url,
+            request_ip,request_params,response_result,option_time,is_optionerror,error_msg from sys_log
+        where 1=1
+        <if test="optionModel != '' and optionModel != null">
+            and option_model =#{optionModel}
+        </if>
+        <if test="startDate != '' and startDate != null">
+            and option_time &gt;= to_date(#{startDate} ,'yyyy-mm-dd') and option_time &lt;=   to_date(#{endDate} ,'yyyy-mm-dd')
+        </if>
+    </select>
+</mapper>

@@ -11,7 +11,7 @@
         <result column="email" property="email"></result>
         <result column="status" javaType="com.example.demo.pojo.enums.UserStatus" property="userStatus" typeHandler="com.example.demo.config.datasource.EnumTypeHandler"/>
         <collection property="roleList" ofType="com.example.demo.pojo.db.role.Role" javaType="ArrayList">
-            <id property="id" column="roleId"></id>
+            <id property="id" column="ROLEID"></id>
             <result property="roleName" column="roleName"></result>
             <collection property="authList" ofType="com.example.demo.pojo.db.auth.Auth" javaType="ArrayList">
                 <id property="roleId" column="authId"></id>
@@ -24,8 +24,9 @@
     </resultMap>
 
     <select id="getUserByUsername" resultMap="User" parameterType="com.example.demo.pojo.db.user.User">
-               select a.id ,username ,password,email,cust_name ,phone ,roleId ,auth,description ,authId from sys_user  a left join
-          (select b.id as roleId ,d.id as authId,d.auth,d.description ,c.user_id from sys_role b ,sys_user_role  c ,sys_auth  d,sys_role_auth e  where  b.id=c.role_id and b.id=e.role_id  and d.id=e.auth_id)  f
+
+     select a.id ,username ,password,email,cust_name ,phone ,roleId ,auth,description ,role_name ,authId from sys_user  a left join
+          (select b.id as roleId ,d.id as authId,d.auth,d.description ,c.user_id,b.role_name from sys_role b ,sys_user_role  c ,sys_auth  d,sys_role_auth e  where  b.id=c.role_id and b.id=e.role_id  and d.id=e.auth_id)  f
           on a.id =f.user_id where  username=#{username} and status='1'
       </select>
 

@@ -2,6 +2,7 @@ package com.example.demo.config.datasource;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
@@ -45,6 +46,7 @@ public class MybatisConfiguration {
         configuration.setLogImpl(org.apache.ibatis.logging.log4j.Log4jImpl.class);
         configuration.setAggressiveLazyLoading(false);
         configuration.setLazyLoadingEnabled(true);
+        configuration.setJdbcTypeForNull(JdbcType.NULL);//解决mybatis插入null值
         //设置枚举转换器
         configuration.setDefaultEnumTypeHandler(EnumTypeHandler.class);
         Set<String> lazyLoadTriggerMethods =new HashSet<String>();
